@@ -121,20 +121,27 @@ void ATest50Character::MoveForward(float Value)
 		UObject* temp2 = m_FiniteStateMachine2.GetDefaultObject();
 		UObject* temp_ = m_FiniteStateMachine.Get();
 		UObject* temp2_ = m_FiniteStateMachine2.Get();
-		UClass* tempclass = temp->GetClass();
+		
 
 		UClass* temp_Owner = Cast<UBlueprintGeneratedClass>(temp_)->GetOwnerClass();
 		UStruct* temp_Owner2 = Cast<UBlueprintGeneratedClass>(temp_)->GetOwnerStruct();
 		
+		UClass* tempclass = temp->GetClass();
 		UClass* thisclass = this->GetClass();
 		
 		FProperty* NewVar_0prop = thisclass->FindPropertyByName(TEXT("NewVar_0"));
 		UFunction* TESTFunction = thisclass->FindFunctionByName(TEXT("TESTFunction"));
+		UFunction* EMptyFunction = thisclass->FindFunctionByName(TEXT("EMptyFunction"));
+		UFunction* testbegin = tempclass->FindFunctionByName(TEXT("OnBegin"));
 
+		if(testbegin) temp->ProcessEvent(testbegin, nullptr);
+		
 		int a = 5;
 
 		a = CastField<FIntProperty>(NewVar_0prop)->GetPropertyValue_InContainer(this, 0);
 		ProcessEvent(TESTFunction, nullptr);
+		int params[3] = {11, 12, 13};
+		ProcessEvent(EMptyFunction, params);
 		a = CastField<FIntProperty>(NewVar_0prop)->GetPropertyValue_InContainer(this, 0);
 
 

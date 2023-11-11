@@ -1,8 +1,8 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "FSMGraphSchema.h"
-#include "FSMGraph.h"
+#include "Graph/FSMGraphSchema.h"
+#include "Graph/FSMGraph.h"
 #include "Classes/EditorStyleSettings.h"
 
 #include "StateNode/FSMStateEntryNode.h"
@@ -12,6 +12,7 @@
 #include "K2Node_FunctionEntry.h"
 
 #include "Kismet2/BlueprintEditorUtils.h"
+#include "StateNode/FSMTransitionNode.h"
 
 
 #define LOCTEXT_NAMESPACE "FSMSSchema"
@@ -75,10 +76,10 @@ void FFSMGraphSchemaAction::AddReferencedObjects(FReferenceCollector& Collector)
 void UFSMGraphSchema::CreateDefaultNodesForGraph(UEdGraph& Graph) const
 {
 	UFSMStateEntryNode* entryNode = nullptr;
-	UFSMStateNode* statenode = nullptr;
 	UFSMProcessNode* processNode = nullptr;
+
 	Graph.Nodes.Empty();
-	
+
 	{
 		FGraphNodeCreator<UFSMStateEntryNode> NodeCreator(Graph);
 		entryNode = NodeCreator.CreateNode();
@@ -93,13 +94,6 @@ void UFSMGraphSchema::CreateDefaultNodesForGraph(UEdGraph& Graph) const
 		SetNodeMetaData(processNode, FNodeMetadata::DefaultGraphNode);
 	}
 
-	{
-		FGraphNodeCreator<UFSMStateNode> NodeCreator(Graph);
-		statenode = NodeCreator.CreateNode();
-		NodeCreator.Finalize();
-		SetNodeMetaData(statenode, FNodeMetadata::DefaultGraphNode);
-	}
-
 	if (UFSMGraph* FSMGraph = CastChecked<UFSMGraph>(&Graph)) 
 	{
 		FSMGraph->EntryNode = entryNode;
@@ -111,8 +105,13 @@ const FPinConnectionResponse UFSMGraphSchema::CanCreateConnection(const UEdGraph
 {
 	if (!(PinA && PinB && PinA->GetOwningNode() && PinB->GetOwningNode()))
 	{
-		return FPinConnectionResponse(CONNECT_RESPONSE_DISALLOW, TEXT(""));
+		return FPinConnectionResponse(CONNECT_RESPONSE_DISALLOW, TEXT("hmm..."));
+	}	
+	if (PinA->GetOwningNode() == PinB->GetOwningNode()) 
+	{
+		return FPinConnectionResponse(CONNECT_RESPONSE_DISALLOW, TEXT("Both are on the same node"));
 	}
+
 
 	const bool bPinAIsEntry = PinA->GetOwningNode()->IsA(UFSMStateEntryNode::StaticClass());
 	const bool bPinBIsEntry = PinB->GetOwningNode()->IsA(UFSMStateEntryNode::StaticClass());
@@ -123,40 +122,49 @@ const FPinConnectionResponse UFSMGraphSchema::CanCreateConnection(const UEdGraph
 	{
 		if (bPinAIsEntry && bPinBIsStateNode)
 		{
-			return FPinConnectionResponse(CONNECT_RESPONSE_BREAK_OTHERS_A, TEXT(""));
+			return FPinConnectionResponse(CONNECT_RESPONSE_BREAK_OTHERS_A, TEXT("Change Link"));
 		}
 
 		if (bPinBIsEntry && bPinAIsStateNode)
 		{
-			return FPinConnectionResponse(CONNECT_RESPONSE_DISALLOW, TEXT(""));
+			return FPinConnectionResponse(CONNECT_RESPONSE_DISALLOW, TEXT("Never Connect to Entry"));
 		}
 
 		return FPinConnectionResponse(CONNECT_RESPONSE_DISALLOW, TEXT("Entry must connect to a state node"));
 	}
 
 
-	if (PinA->GetOwningNode() == PinB->GetOwningNode()) return FPinConnectionResponse(CONNECT_RESPONSE_DISALLOW, TEXT(""));
-	
 
+
+	if (!IsAlreadyConnected(PinA, PinB)) 
+	{
+		return FPinConnectionResponse(CONNECT_RESPONSE_DISALLOW, TEXT("Nodes Is Already Connected"));
+	}
 
 	return FPinConnectionResponse(CONNECT_RESPONSE_MAKE_WITH_CONVERSION_NODE, TEXT("Create a transition"));
 }
 
 bool UFSMGraphSchema::TryCreateConnection(UEdGraphPin* PinA, UEdGraphPin* PinB) const
 {
+	//A가 이전 B가 다음 이기때문에 A가 출력 B가 입력으로 바꿔줌
 	if (PinA->Direction == PinB->Direction)
 	{
+		if (UFSMStateNode_Base* ANode = Cast<UFSMStateNode_Base>(PinA->GetOwningNode()))
+		{
+			PinA = ANode->GetOutputPin();
+		}
 		if (UFSMStateNode_Base* BNode = Cast<UFSMStateNode_Base>(PinB->GetOwningNode()))
 		{
-			if (PinA->Direction == EGPD_Input)
-			{
-				PinB = BNode->GetOutputPin();
-			}
-			else {
-				PinB = BNode->GetInputPin();
-			}
+			PinB = BNode->GetInputPin();
 		}
-	}	
+	}
+	else if (PinA->Direction == EGPD_Input && PinB->Direction == EGPD_Output)
+	{
+		UEdGraphPin* temp = PinA;
+		PinA = PinB;
+		PinB = temp;
+	}
+
 	const bool bModified = UEdGraphSchema::TryCreateConnection(PinA, PinB);
 	if (bModified)
 	{
@@ -168,24 +176,49 @@ bool UFSMGraphSchema::TryCreateConnection(UEdGraphPin* PinA, UEdGraphPin* PinB) 
 
 bool UFSMGraphSchema::CreateAutomaticConversionNodeAndConnections(UEdGraphPin* PinA, UEdGraphPin* PinB) const
 {
-	if (PinA->Direction == EGPD_Input) 
+	UFSMStateNode* NodeA = Cast<UFSMStateNode>(PinA->GetOwningNode());
+	UFSMStateNode* NodeB = Cast<UFSMStateNode>(PinB->GetOwningNode());
+	
+	if(!IsAlreadyConnected(PinA, PinB)) return false;
+
+
+	if (NodeA && NodeB)
 	{
-		PinA->Modify();
-		PinB->Modify();
-		PinA->MakeLinkTo(PinB);
+		UFSMTransitionNode* TransitionNode = FFSMGraphSchemaAction::SpawnNodeFromTemplate<UFSMTransitionNode>(NodeA->GetGraph(), NewObject<UFSMTransitionNode>(), FVector2D(0.0f, 0.0f), false);
+		if (PinA->Direction == EGPD_Input)
+		{
+			TransitionNode->CreateConnections(NodeB, NodeA);
+		}
+		else
+		{
+			TransitionNode->CreateConnections(NodeA, NodeB);
+		}
+		
 	}
-	else 
-	{
-		PinB->Modify();
-		PinA->Modify();
-		PinB->MakeLinkTo(PinA);
-	}
+	
 	return true;
 }
 
 FLinearColor UFSMGraphSchema::GetPinTypeColor(const FEdGraphPinType& PinType) const
 {
 	return FLinearColor::White;
+}
+
+EGraphType UFSMGraphSchema::GetGraphType(const UEdGraph* TestEdGraph) const
+{
+	return GT_StateMachine;
+}
+
+bool UFSMGraphSchema::IsAlreadyConnected(const UEdGraphPin* PinA, const UEdGraphPin* PinB) const
+{
+	for (auto& item : PinA->LinkedTo)
+	{
+		if (UFSMTransitionNode* TransitionNode = Cast<UFSMTransitionNode>(item->GetOwningNode()))
+		{
+			if (TransitionNode->GetNextState() == PinB->GetOwningNode()) return false;
+		}
+	}
+	return true;
 }
 
 //bool UFSMGraphSchema::TryCreateConnection(UEdGraphPin* A, UEdGraphPin* B) const
@@ -217,3 +250,37 @@ void UFSMGraphSchema::GetGraphContextActions(FGraphContextMenuBuilder& ContextMe
 	}
 }
 
+const FPinConnectionResponse UFSMGraphSchema_K2::CanCreateConnection(const UEdGraphPin* PinA, const UEdGraphPin* PinB) const
+{
+	if (!(PinA && PinB && PinA->GetOwningNode() && PinB->GetOwningNode()))
+	{
+		return FPinConnectionResponse(CONNECT_RESPONSE_DISALLOW, TEXT(""));
+	}
+
+	const bool bPinAIsEntry = PinA->GetOwningNode()->IsA(UFSMStateEntryNode::StaticClass());
+	const bool bPinBIsEntry = PinB->GetOwningNode()->IsA(UFSMStateEntryNode::StaticClass());
+	const bool bPinAIsStateNode = PinA->GetOwningNode()->IsA(UFSMStateNode_Base::StaticClass());
+	const bool bPinBIsStateNode = PinB->GetOwningNode()->IsA(UFSMStateNode_Base::StaticClass());
+
+	if (bPinAIsEntry || bPinBIsEntry)
+	{
+		if (bPinAIsEntry && bPinBIsStateNode)
+		{
+			return FPinConnectionResponse(CONNECT_RESPONSE_BREAK_OTHERS_A, TEXT(""));
+		}
+
+		if (bPinBIsEntry && bPinAIsStateNode)
+		{
+			return FPinConnectionResponse(CONNECT_RESPONSE_DISALLOW, TEXT(""));
+		}
+
+		return FPinConnectionResponse(CONNECT_RESPONSE_DISALLOW, TEXT("Entry must connect to a state node"));
+	}
+
+
+	if (PinA->GetOwningNode() == PinB->GetOwningNode()) return FPinConnectionResponse(CONNECT_RESPONSE_DISALLOW, TEXT(""));
+
+
+
+	return FPinConnectionResponse(CONNECT_RESPONSE_MAKE_WITH_CONVERSION_NODE, TEXT("Create a transition"));
+}

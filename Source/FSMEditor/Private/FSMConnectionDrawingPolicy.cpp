@@ -4,6 +4,7 @@
 #include "FSMConnectionDrawingPolicy.h"
 #include "StateNode/FSMStateNode_Base.h"
 #include "StateNode/FSMStateEntryNode.h"
+#include "StateNode/FSMTransitionNode.h"
 
 FFSMConnectionDrawingPolicy::FFSMConnectionDrawingPolicy(int32 InBackLayerID, int32 InFrontLayerID, float ZoomFactor, const FSlateRect& InClippingRect, FSlateWindowElementList& InDrawElements, UEdGraph* InGraphObj)
 	: FConnectionDrawingPolicy(InBackLayerID, InFrontLayerID, ZoomFactor, InClippingRect, InDrawElements)
@@ -51,30 +52,30 @@ void FFSMConnectionDrawingPolicy::DetermineLinkGeometry(
 		int32 StateIndex = NodeWidgetMap.FindChecked(State);
 		EndWidgetGeometry = &(ArrangedNodes[StateIndex]);
 	}
-	//else if (UAnimStateTransitionNode* TransNode = Cast<UAnimStateTransitionNode>(InputPin->GetOwningNode()))
-	//{
-	//	UAnimStateNodeBase* PrevState = TransNode->GetPreviousState();
-	//	UAnimStateNodeBase* NextState = TransNode->GetNextState();
-	//	if ((PrevState != NULL) && (NextState != NULL))
-	//	{
-	//		int32* PrevNodeIndex = NodeWidgetMap.Find(PrevState);
-	//		int32* NextNodeIndex = NodeWidgetMap.Find(NextState);
-	//		if ((PrevNodeIndex != NULL) && (NextNodeIndex != NULL))
-	//		{
-	//			StartWidgetGeometry = &(ArrangedNodes[*PrevNodeIndex]);
-	//			EndWidgetGeometry = &(ArrangedNodes[*NextNodeIndex]);
-	//		}
-	//	}
-	//}
+	else if (UFSMTransitionNode* TransNode = Cast<UFSMTransitionNode>(InputPin->GetOwningNode()))
+	{
+		UFSMStateNode_Base* PrevState = TransNode->GetPrevState();
+		UFSMStateNode_Base* NextState = TransNode->GetNextState();
+		if ((PrevState != NULL) && (NextState != NULL))
+		{
+			int32* PrevNodeIndex = NodeWidgetMap.Find(PrevState);
+			int32* NextNodeIndex = NodeWidgetMap.Find(NextState);
+			if ((PrevNodeIndex != NULL) && (NextNodeIndex != NULL))
+			{
+				StartWidgetGeometry = &(ArrangedNodes[*PrevNodeIndex]);
+				EndWidgetGeometry = &(ArrangedNodes[*NextNodeIndex]);
+			}
+		}
+	}
 	else
 	{
-		StartWidgetGeometry = PinGeometries->Find(OutputPinWidget);
+		//StartWidgetGeometry = PinGeometries->Find(OutputPinWidget);
 
-		UFSMStateNode_Base* State = CastChecked<UFSMStateNode_Base>(InputPin->GetOwningNode());
-		int32 StateIndex = NodeWidgetMap.FindChecked(State);
-		EndWidgetGeometry = &(ArrangedNodes[StateIndex]);
+		//UFSMStateNode_Base* State = CastChecked<UFSMStateNode_Base>(InputPin->GetOwningNode());
+		//int32 StateIndex = NodeWidgetMap.FindChecked(State);
+		//EndWidgetGeometry = &(ArrangedNodes[StateIndex]);
 
-		//FConnectionDrawingPolicy::DetermineLinkGeometry(ArrangedNodes, OutputPinWidget, OutputPin, InputPin, StartWidgetGeometry, EndWidgetGeometry);
+		FConnectionDrawingPolicy::DetermineLinkGeometry(ArrangedNodes, OutputPinWidget, OutputPin, InputPin, StartWidgetGeometry, EndWidgetGeometry);
 	}
 }
 

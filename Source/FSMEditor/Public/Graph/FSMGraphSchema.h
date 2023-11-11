@@ -30,7 +30,7 @@ struct FSMEDITOR_API FFSMGraphSchemaAction : public FEdGraphSchemaAction
 	template <typename NodeType>
 	static NodeType* SpawnNodeFromTemplate(class UEdGraph* ParentGraph, NodeType* InTemplateNode, const FVector2D Location = FVector2D(0.0f, 0.0f), bool bSelectNewNode = true)
 	{
-		FEdGraphSchemaAction_NewStateNode Action;
+		FFSMGraphSchemaAction Action;
 		Action.NodeTemplate = InTemplateNode;
 
 		return Cast<NodeType>(Action.PerformAction(ParentGraph, NULL, Location, bSelectNewNode));
@@ -53,5 +53,19 @@ public:
 	virtual void GetGraphContextActions(FGraphContextMenuBuilder& ContextMenuBuilder) const override;
 	//virtual void GetContextMenuActions(class UToolMenu* Menu, class UGraphNodeContextMenuContext* Context) const override;
 	virtual FLinearColor GetPinTypeColor(const FEdGraphPinType& PinType) const override;
+	virtual EGraphType GetGraphType(const UEdGraph* TestEdGraph) const override;
+	virtual bool CanDuplicateGraph(UEdGraph* InSourceGraph) const override { return false; }
+
 #pragma endregion
+
+
+	virtual bool IsAlreadyConnected(const UEdGraphPin* PinA, const UEdGraphPin* PinB) const;
+};
+
+UCLASS()
+class FSMEDITOR_API UFSMGraphSchema_K2 : public UEdGraphSchema_K2 
+{
+	GENERATED_BODY()
+public:
+	virtual const FPinConnectionResponse CanCreateConnection(const UEdGraphPin* A, const UEdGraphPin* B) const override;
 };

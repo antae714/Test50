@@ -5,8 +5,17 @@
 #include "FSMBlueprint.h"
 #include "FiniteStateMachine.h"
 #include "FSMBlueprintGeneratedClass.h"
-#include "StateNode/FSMStateNode_Base.h"
 #include "Kismet2/KismetReinstanceUtilities.h"
+#include "Graph/FSMGraphSchema.h"
+#include "EdGraphUtilities.h"
+
+#include "StateNode/FSMStateNode_Base.h"
+#include "StateNode/FSMProcessNode.h"
+#include "StateNode/FSMStateNode.h"
+#include "StateNode/FSMTransitionNode.h"
+
+
+
 
 bool FFSMBlueprintCompiler::CanCompile(const UBlueprint* Blueprint)
 {
@@ -58,17 +67,78 @@ void FFSMKismetCompilerContext::SpawnNewClass(const FString& NewClassName)
 	}
 }
 
-//bool FFSMKismetCompilerContext::IsNodePure(const UEdGraphNode* Node) const
+//UEdGraphSchema_K2* FFSMKismetCompilerContext::CreateSchema()
 //{
-//	if(Node->IsA<UFSMStateNode_Base>())
-//	{
-//		return true;
-//	}
-//	return FKismetCompilerContext::IsNodePure(Node);
+//	return NewObject<UFSMGraphSchema_K2>();
 //}
-//
-//bool FFSMKismetCompilerContext::ShouldForceKeepNode(const UEdGraphNode* Node) const
-//{
-//	return Node->IsA<UFSMStateNode_Base>();
-//}
+
+
+bool FFSMKismetCompilerContext::IsNodePure(const UEdGraphNode* Node) const
+{
+	if(Node->IsA<UFSMStateNode_Base>())
+	{
+		return true;
+	}
+	return Super::IsNodePure(Node);
+}
+
+bool FFSMKismetCompilerContext::ShouldForceKeepNode(const UEdGraphNode* Node) const
+{
+	return Super::ShouldForceKeepNode(Node);
+	return Node->IsA<UFSMStateNode_Base>();
+}
+
+void FFSMKismetCompilerContext::MergeUbergraphPagesIn(UEdGraph* Ubergraph)
+{
+	Super::MergeUbergraphPagesIn(Ubergraph);
+
+	UEdGraph* rootFSMGraph = GetBlueprint<UFSMBlueprint>()->GetRootFSMGraph();
+	if ((rootFSMGraph))
+	{
+		TArray<UFSMStateNode*> nodes;
+		rootFSMGraph->GetNodesOfClass<UFSMStateNode>(nodes);
+		for (auto& item : nodes)
+		{
+			if (UEdGraph* boundgraph = item->GetBoundGraph())
+			{
+				FEdGraphUtilities::CloneAndMergeGraphIn(Ubergraph, boundgraph, MessageLog, /*bRequireSchemaMatch=*/ true, /*bIsCompiling*/ true);
+			}
+		}
+	}
+}
+
+void FFSMKismetCompilerContext::CreateFunctionList()
+{
+	Super::CreateFunctionList();
+	UEdGraph* rootFSMGraph = GetBlueprint<UFSMBlueprint>()->GetRootFSMGraph();
+	if ((rootFSMGraph))
+	{
+		TArray<UFSMTransitionNode*> nodes;
+		rootFSMGraph->GetNodesOfClass<UFSMTransitionNode>(nodes);
+		for (auto& item : nodes)
+		{
+			if (UEdGraph* boundgraph = item->GetBoundGraph())
+			{
+				ProcessOneFunctionGraph(boundgraph);
+			}
+		}
+	}
+
+
+}
+
+void FFSMKismetCompilerContext::CompileFunction(FKismetFunctionContext& Context)
+{
+	UFSMProcessNode* processNode = nullptr;
+	int index = 0;
+	
+	Context.LinearExecutionList.FindItemByClass<UFSMProcessNode>(&processNode, &index);
+	Context.LinearExecutionList.Swap(0, index);
+	for (int i = 1; i < index; i++)
+	{
+		Context.LinearExecutionList.Swap(i, index);
+	}
+
+	Super::CompileFunction(Context);
+}
 

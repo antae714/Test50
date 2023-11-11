@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "FSMStateNode_Base.h"
+#include "FSMState.h"
 #include "FSMStateNode.generated.h"
 
 /**
@@ -13,8 +14,23 @@ UCLASS()
 class FSMEDITOR_API UFSMStateNode : public UFSMStateNode_Base
 {
 	GENERATED_BODY()
-
 public:
-	//`FFSMState m_State;
+#pragma region UEdGraphNode Interface
 	virtual void AutowireNewNode(UEdGraphPin* FromPin) override;
+	virtual void PostPasteNode() override;
+	virtual void PostPlacedNewNode() override;
+#pragma endregion
+
+#pragma region UFSMStateNode_Base Interface
+	virtual UEdGraph* GetBoundGraph() const override { return BoundGraph; }
+	virtual FString GetNodeName() const override { return BoundGraph->GetName();  }
+	virtual void Compile(struct FKismetFunctionContext& Context) const override;
+#pragma endregion
+
+
+	UPROPERTY()
+	FFSMState State;
+protected:
+	UPROPERTY()
+	TObjectPtr<class UEdGraph> BoundGraph;
 };

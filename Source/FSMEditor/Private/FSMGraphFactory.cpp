@@ -2,22 +2,22 @@
 
 
 #include "FSMGraphFactory.h"
-#include "StateNode/FSMGraphNode_Base.h"
-#include "StateNode/FSMGraphNode_Root.h"
 
 #include "StateNode/FSMStateNode_Base.h"
 #include "StateNode/FSMStateNode.h"
 #include "StateNode/FSMStateEntryNode.h"
+#include "StateNode/FSMTransitionNode.h"
 
 #include "StateNode/FSMProcessNode.h"
 
 #include "SlateNode/SFSMStateNode_Base.h"
 #include "SlateNode/SFSMStateNode.h"
 #include "SlateNode/SFSMStateEntryNode.h"
+#include "SlateNode/SFSMTransitionNode.h"
 
 #include "KismetPins/SGraphPinExec.h"
 #include "FSMConnectionDrawingPolicy.h"
-#include "FSMGraphSchema.h"
+#include "Graph/FSMGraphSchema.h"
 
 class STransparentGraphNode : public SGraphNode
 {
@@ -38,9 +38,13 @@ TSharedPtr<class SGraphNode> FFSMGraphNodeFactory::CreateNode(UEdGraphNode* InNo
 		{
 			return SNew(SFSMStateEntryNode, BaseStateNode);
 		}
-		else if(UFSMStateNode* StateNode = Cast<UFSMStateNode>(InNode))
+		else if (UFSMStateNode* StateNode = Cast<UFSMStateNode>(InNode))
 		{
 			return SNew(SFSMStateNode, BaseStateNode);
+		}
+		else if (UFSMTransitionNode* TransitionNode = Cast<UFSMTransitionNode>(InNode))
+		{
+			return SNew(SFSMTransitionNode, BaseStateNode);
 		}
 	}
 	else if (UFSMProcessNode* ProcesNode = Cast<UFSMProcessNode>(InNode))

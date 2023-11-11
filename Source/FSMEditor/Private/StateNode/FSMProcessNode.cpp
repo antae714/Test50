@@ -3,7 +3,7 @@
 
 #include "StateNode/FSMProcessNode.h"
 #include "KismetCompiler.h"
-#include "FSMGraph.h"
+#include "Graph/FSMGraph.h"
 #include "StateNode/FSMStateNode_Base.h"
 
 #include "FSMBlueprint.h"
@@ -28,7 +28,8 @@ public:
 		TArray<UFSMStateNode_Base*> GrapNodes;
 		TArray<UEdGraph*> BP_Graps;
 
-		Context.GetBlueprint()->GetAllGraphs(BP_Graps);
+		Context.GetBlueprint()->GetAllGraphs(BP_Graps); 
+		
 		for (UEdGraph*& Grap : BP_Graps)
 		{
 			if(!Grap->IsA<UFSMGraph>()) continue;
@@ -49,7 +50,6 @@ public:
 		
 		
 		UObject* tempobj = Context.NewClass->GetDefaultObject();
-
 
 
 

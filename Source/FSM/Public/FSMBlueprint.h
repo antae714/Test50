@@ -23,5 +23,11 @@ public:
 #endif	//#if WITH_EDITOR
 #pragma endregion
 
+public:
+	UEdGraph* GetRootFSMGraph() const { return RootFSMGraph; }
+	void SetRootFSMGraph(UEdGraph* InRootFSMGraph) { RootFSMGraph = InRootFSMGraph; }
 
+private:
+	UPROPERTY()
+	UEdGraph* RootFSMGraph;
 };

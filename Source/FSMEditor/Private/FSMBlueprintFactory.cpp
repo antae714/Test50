@@ -6,8 +6,8 @@
 #include "FiniteStateMachine.h"
 #include "Kismet2/BlueprintEditorUtils.h"
 #include "Kismet2/KismetEditorUtilities.h"
-#include "FSMGraph.h"
-#include "FSMGraphSchema.h"
+#include "Graph/FSMGraph.h"
+#include "Graph/FSMGraphSchema.h"
 
 UFSMBlueprintFactory::UFSMBlueprintFactory(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
@@ -28,6 +28,7 @@ UObject* UFSMBlueprintFactory::FactoryCreateNew(UClass* Class, UObject* InParent
 	FBlueprintEditorUtils::AddUbergraphPage(blueprint, FSMGraph);
 
 	blueprint->LastEditedDocuments.Add(FSMGraph);
+	blueprint->SetRootFSMGraph(FSMGraph);
 	
 	return blueprint;
 }

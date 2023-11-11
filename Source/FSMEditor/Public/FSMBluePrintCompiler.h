@@ -21,13 +21,26 @@ class FSMEDITOR_API FFSMBlueprintCompiler : public IBlueprintCompiler
 
 class FSMEDITOR_API FFSMKismetCompilerContext : public FKismetCompilerContext
 {
+	typedef FKismetCompilerContext Super;
 public:
 	FFSMKismetCompilerContext(class UFSMBlueprint* SourceSketch, FCompilerResultsLog& InMessageLog, const FKismetCompilerOptions& InCompileOptions);
 
 
 public:
-
 	virtual void SpawnNewClass(const FString& NewClassName) override;
-	//virtual bool IsNodePure(const UEdGraphNode* Node) const;
-	//virtual bool ShouldForceKeepNode(const UEdGraphNode* Node) const override;
+	//virtual UEdGraphSchema_K2* CreateSchema() override;
+	virtual bool IsNodePure(const UEdGraphNode* Node) const;
+	virtual bool ShouldForceKeepNode(const UEdGraphNode* Node) const override;
+
+	virtual void MergeUbergraphPagesIn(UEdGraph* Ubergraph);
+	virtual void CreateFunctionList();
+	virtual void CompileFunction(FKismetFunctionContext& Context);
+
+
+
+	template<typename T>
+	T* GetBlueprint() const
+	{
+		return Cast<T>(Blueprint);
+	}
 };

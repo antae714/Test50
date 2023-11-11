@@ -3,35 +3,9 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "FSMState.h"
+#include "FSMTransition.h"
 #include "FiniteStateMachine.generated.h"
-
-USTRUCT()
-struct FTramsition
-{
-	GENERATED_BODY()
-public:
-	FFSMState* m_OwnedNode;
-	FFSMState* m_NextNode;
-};
-DECLARE_DYNAMIC_MULTICAST_DELEGATE(FStateBeginDelegate);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE(FStateUpdateDelegate);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE(FStateEndDelegate);
-
-USTRUCT()
-struct FFSMState
-{
-	GENERATED_BODY()
-public:
-
-	UPROPERTY(BlueprintAssignable)
-	FStateBeginDelegate StateBegin;
-	UPROPERTY(BlueprintAssignable)
-	FStateUpdateDelegate StateUpdate;
-	UPROPERTY(BlueprintAssignable)
-	FStateEndDelegate StateEnd;
-public:
-	TArray<FTramsition> m_ConnectedTransition;
-};
 
 /**
  * 
@@ -43,8 +17,10 @@ class FSM_API UFiniteStateMachine : public UObject//, public FTickableGameObject
 public:
 	UFiniteStateMachine();
 
-	TArray<FFSMState> m_State;
-	TArray<FTramsition> m_Transition;
+	TArray<struct FFSMState> m_State;
+	TArray<struct FFSMTransition> m_Transition;
 
-	FFSMState* EnteryState;
+	FFSMState EnteryState;
 };
+
+
