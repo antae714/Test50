@@ -31,7 +31,7 @@ UEdGraphNode* FFSMGraphSchemaAction::PerformAction(UEdGraph* ParentGraph, UEdGra
 	// If there is a template, we actually use it
 	if (NodeTemplate != NULL)
 	{
-		const FScopedTransaction Transaction(NSLOCTEXT("UnrealEd", "K2_AddNode", "Add Node"));
+		const FScopedTransaction Transaction(LOCTEXT("K2_AddFSMNode", "Add Node"));
 		ParentGraph->Modify();
 		if (FromPin)
 		{
@@ -105,11 +105,11 @@ const FPinConnectionResponse UFSMGraphSchema::CanCreateConnection(const UEdGraph
 {
 	if (!(PinA && PinB && PinA->GetOwningNode() && PinB->GetOwningNode()))
 	{
-		return FPinConnectionResponse(CONNECT_RESPONSE_DISALLOW, TEXT("hmm..."));
+		return FPinConnectionResponse(CONNECT_RESPONSE_DISALLOW, LOCTEXT("Conect Node Invalid", "Conect Node Invalid"));
 	}	
 	if (PinA->GetOwningNode() == PinB->GetOwningNode()) 
 	{
-		return FPinConnectionResponse(CONNECT_RESPONSE_DISALLOW, TEXT("Both are on the same node"));
+		return FPinConnectionResponse(CONNECT_RESPONSE_DISALLOW, LOCTEXT("Conect Node are same", "Both are on the same node"));
 	}
 
 
@@ -122,15 +122,15 @@ const FPinConnectionResponse UFSMGraphSchema::CanCreateConnection(const UEdGraph
 	{
 		if (bPinAIsEntry && bPinBIsStateNode)
 		{
-			return FPinConnectionResponse(CONNECT_RESPONSE_BREAK_OTHERS_A, TEXT("Change Link"));
+			return FPinConnectionResponse(CONNECT_RESPONSE_BREAK_OTHERS_A, LOCTEXT("Change Link", "Change Link"));
 		}
 
 		if (bPinBIsEntry && bPinAIsStateNode)
 		{
-			return FPinConnectionResponse(CONNECT_RESPONSE_DISALLOW, TEXT("Never Connect to Entry"));
+			return FPinConnectionResponse(CONNECT_RESPONSE_DISALLOW, LOCTEXT("Never Connect to Entry", "Never Connect to Entry"));
 		}
 
-		return FPinConnectionResponse(CONNECT_RESPONSE_DISALLOW, TEXT("Entry must connect to a state node"));
+		return FPinConnectionResponse(CONNECT_RESPONSE_DISALLOW, LOCTEXT("Entry must connect to a state node", "Entry must connect to a state node"));
 	}
 
 
@@ -138,10 +138,10 @@ const FPinConnectionResponse UFSMGraphSchema::CanCreateConnection(const UEdGraph
 
 	if (!IsAlreadyConnected(PinA, PinB)) 
 	{
-		return FPinConnectionResponse(CONNECT_RESPONSE_DISALLOW, TEXT("Nodes Is Already Connected"));
+		return FPinConnectionResponse(CONNECT_RESPONSE_DISALLOW, LOCTEXT("Nodes Is Already Connected", "Nodes Is Already Connected"));
 	}
 
-	return FPinConnectionResponse(CONNECT_RESPONSE_MAKE_WITH_CONVERSION_NODE, TEXT("Create a transition"));
+	return FPinConnectionResponse(CONNECT_RESPONSE_MAKE_WITH_CONVERSION_NODE, LOCTEXT("Create a transition", "Create a transition"));
 }
 
 bool UFSMGraphSchema::TryCreateConnection(UEdGraphPin* PinA, UEdGraphPin* PinB) const
@@ -245,7 +245,7 @@ void UFSMGraphSchema::GetGraphContextActions(FGraphContextMenuBuilder& ContextMe
 {
 	Super::GetGraphContextActions(ContextMenuBuilder);
 	{
-		TSharedPtr<FFSMGraphSchemaAction> Action = AddNewStateNodeAction(ContextMenuBuilder, FText::GetEmpty(), LOCTEXT("AddState", "Add State..."), LOCTEXT("AddStateTooltip", "A new state"));
+		TSharedPtr<FFSMGraphSchemaAction> Action = AddNewStateNodeAction(ContextMenuBuilder, LOCTEXT("State Category", "Finite State Machine"), LOCTEXT("AddState", "Add State"), LOCTEXT("AddStateTooltip", "A new state"));
 		Action->NodeTemplate = NewObject<UFSMStateNode>(ContextMenuBuilder.OwnerOfTemporaries);
 	}
 }

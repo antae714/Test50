@@ -20,14 +20,13 @@ public:
 
 	virtual void Compile(FKismetFunctionContext& Context, UEdGraphNode* Node) override 
 	{
-		
 		UFSM_Event* EventNode = CastChecked<UFSM_Event>(Node);
 		
 		UFunction* findfuction = Context.NewClass->FindFunctionByName(EventNode->CustomFunctionName);
 		if (findfuction) 
 		{
 			UFiniteStateMachine* CDO = Context.NewClass->GetDefaultObject<UFiniteStateMachine>();
-			FFSMState* state = CDO->m_State.FindByKey(EventNode->StateGuid);
+			FFSMState* state = CDO->State.FindByKey(EventNode->StateGuid);
 			state->SettingFunction(EventNode->DelegateName, findfuction);
 
 			Context.NewClass->RemoveFunctionFromFunctionMap(findfuction);

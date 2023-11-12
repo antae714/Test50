@@ -7,18 +7,12 @@
 //const FName FFSMState::StateUpdateName(TEXT("State Update"));
 //const FName FFSMState::StateExitName(TEXT("State Exit"));
 
-void FFSMState::Init(InitArgs arg)
-{
-	m_Name = arg.Name;
-	m_CompiledNodeGuid = arg.CompiledNodeGuid;
-}
-
 void FFSMState::SettingFunction(FName FunctionName, UFunction* func)
 {
 	if (FunctionName == StateEntryName)
 	{
 		StateEntry = func;
-	}
+	}  
 	else if (FunctionName == StateUpdateName)
 	{
 		StateUpdate = func;

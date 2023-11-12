@@ -3,10 +3,17 @@
 
 #include "FSMGraphFactory.h"
 
+#include "Graph/FSMTransitionGraph.h"
+#include "Graph/FSMGraphSchema.h"
+
+#include "K2Node_FunctionEntry.h"
+#include "K2Node_FunctionResult.h"
+
 #include "StateNode/FSMStateNode_Base.h"
 #include "StateNode/FSMStateNode.h"
 #include "StateNode/FSMStateEntryNode.h"
 #include "StateNode/FSMTransitionNode.h"
+#include "StateNode/FSMTransitionResultNode.h"
 
 #include "StateNode/FSMProcessNode.h"
 
@@ -17,7 +24,6 @@
 
 #include "KismetPins/SGraphPinExec.h"
 #include "FSMConnectionDrawingPolicy.h"
-#include "Graph/FSMGraphSchema.h"
 
 class STransparentGraphNode : public SGraphNode
 {
@@ -28,6 +34,24 @@ class STransparentGraphNode : public SGraphNode
 		GraphNode = InNode;
 		SetVisibility(EVisibility::Collapsed);
 	}
+};
+
+class STranstionConditionGraphNode : public SGraphNode
+{
+	SLATE_BEGIN_ARGS(STransparentGraphNode) {}
+	SLATE_END_ARGS()
+	void Construct(const FArguments& InArgs, UEdGraphNode* InNode)
+	{
+		GraphNode = InNode;
+		SetCursor(EMouseCursor::CardinalCross);
+		UpdateGraphNode();
+	}
+	virtual void CreateStandardPinWidget(UEdGraphPin* Pin)
+	{
+		if (Pin->Direction == EGPD_Input && Pin->PinName == UEdGraphSchema_K2::PN_Execute) return;
+		SGraphNode::CreateStandardPinWidget(Pin);
+	}
+
 };
 
 TSharedPtr<class SGraphNode> FFSMGraphNodeFactory::CreateNode(UEdGraphNode* InNode) const
@@ -51,7 +75,15 @@ TSharedPtr<class SGraphNode> FFSMGraphNodeFactory::CreateNode(UEdGraphNode* InNo
 	{
 		return SNew(STransparentGraphNode, InNode);
 	}
-
+	else if (Cast<UK2Node_FunctionEntry>(InNode) && Cast<UFSMTransitionGraph>(InNode->GetGraph()))
+	{
+		return SNew(STransparentGraphNode, InNode);
+	}
+	else if (Cast<UFSMTransitionResultNode>(InNode))
+	{
+		return SNew(STranstionConditionGraphNode, InNode);
+	}
+	//
 	return nullptr;
 }
 

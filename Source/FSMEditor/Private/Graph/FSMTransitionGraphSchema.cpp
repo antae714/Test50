@@ -16,32 +16,28 @@
 void UFSMTransitionGraphSchema::CreateDefaultNodesForGraph(UEdGraph& Graph) const
 {
 	UFSMTransitionGraph* TransitionGraph = Cast<UFSMTransitionGraph>(&Graph);
-	if(0){
-		FGraphNodeCreator<UK2Node_CallFunction> NodeCreator(Graph);
-		UK2Node_CallFunction* resultNode = NodeCreator.CreateNode();
-		NodeCreator.Finalize();
-		SetNodeMetaData(resultNode, FNodeMetadata::DefaultGraphNode);
-		//resultNode->set()
-		//resultNode->SetFromFunction(FFSMTransitionUtil::StaticClass()->FindFunctionByName(GET_FUNCTION_NAME_CHECKED(FFSMTransitionUtil, CheckTransitionCondition)));
-	}
+	UK2Node_FunctionEntry* FunctionEntryNode = nullptr;
+	UFSMTransitionResultNode* TransitionResultNode = nullptr;
+
 	{
 		FGraphNodeCreator<UK2Node_FunctionEntry> NodeCreator(Graph);
-		UK2Node_FunctionEntry* resultNode = NodeCreator.CreateNode();
+		FunctionEntryNode = NodeCreator.CreateNode();
 		NodeCreator.Finalize();
-		SetNodeMetaData(resultNode, FNodeMetadata::DefaultGraphNode);
-		resultNode->CustomGeneratedFunctionName = FName(TransitionGraph->owningNode->GetNodeName());
-		//resultNode->set()
-		//resultNode->SetFromFunction(FFSMTransitionUtil::StaticClass()->FindFunctionByName(GET_FUNCTION_NAME_CHECKED(FFSMTransitionUtil, CheckTransitionCondition)));
-	} 
-	{
-		FGraphNodeCreator<UK2Node_FunctionResult> NodeCreator(Graph);
-		UK2Node_FunctionResult* resultNode = NodeCreator.CreateNode();
-		NodeCreator.Finalize();
-		SetNodeMetaData(resultNode, FNodeMetadata::DefaultGraphNode);
-		resultNode->CreatePin(EGPD_Input, UEdGraphSchema_K2::PC_Boolean, TEXT("Transition Condition"));
-		//resultNode->set()
-		//resultNode->SetFromFunction(FFSMTransitionUtil::StaticClass()->FindFunctionByName(GET_FUNCTION_NAME_CHECKED(FFSMTransitionUtil, CheckTransitionCondition)));
+		SetNodeMetaData(FunctionEntryNode, FNodeMetadata::DefaultGraphNode);
+		/////////////////////////////////////////////////////////////////////////////////////////////////
+		FunctionEntryNode->CustomGeneratedFunctionName = TransitionGraph->owningNode->GetFName();
 	}
+	{
+		FGraphNodeCreator<UFSMTransitionResultNode> NodeCreator(Graph);
+		TransitionResultNode = NodeCreator.CreateNode();
+		NodeCreator.Finalize();
+		SetNodeMetaData(TransitionResultNode, FNodeMetadata::DefaultGraphNode);
+		TransitionResultNode->Setting();
+	}
+	UEdGraphPin* FunctionEntryPin = FunctionEntryNode->FindPin(UEdGraphSchema_K2::PN_Then, EGPD_Output);
+	UEdGraphPin* FunctionResultPin = TransitionResultNode->FindPin(UEdGraphSchema_K2::PN_Execute, EGPD_Input);
+
+	FunctionEntryPin->MakeLinkTo(FunctionResultPin);
 }
 
 void UFSMTransitionGraphSchema::GetGraphDisplayInformation(const UEdGraph& Graph, FGraphDisplayInfo& DisplayInfo) const
@@ -53,8 +49,8 @@ void UFSMTransitionGraphSchema::GetGraphDisplayInformation(const UEdGraph& Graph
 	if (TransNode)
 	{
 		FFormatNamedArguments Args;
-		Args.Add(TEXT("NodeTitle"), TransNode->GetNodeTitle(ENodeTitleType::FullTitle));
-		DisplayInfo.PlainName = FText::Format(NSLOCTEXT("UFSMTransitionGraphSchema", "TransitionGraphTitle", "{NodeTitle}"), Args);
+		Args.Add(TEXT("TransNodeTitle"), TransNode->GetNodeTitle(ENodeTitleType::FullTitle));
+		DisplayInfo.PlainName = FText::Format(NSLOCTEXT("UFSMTransitionGraphSchema", "TransitionGraphTitle", "{TransNodeTitle}"), Args);
 	}
 
 	DisplayInfo.DisplayName = DisplayInfo.PlainName;

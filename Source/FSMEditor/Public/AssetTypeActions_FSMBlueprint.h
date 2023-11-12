@@ -16,7 +16,7 @@ public:
 
 public:
 #pragma region FAssetTypeActions_Blueprint Interface
-	virtual FText GetName() const override { return NSLOCTEXT("FAssetTypeActions_FSM", "Finite State Machine", "Finite State Machine"); }
+	virtual FText GetName() const override; 
 	virtual FColor GetTypeColor() const override { return FColor::Purple; }
 	virtual UClass* GetSupportedClass() const override { return UFSMBlueprint::StaticClass(); }
 	virtual void OpenAssetEditor(const TArray<UObject*>& InObjects, TSharedPtr<class IToolkitHost> EditWithinLevelEditor = TSharedPtr<IToolkitHost>()) override;

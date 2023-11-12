@@ -17,8 +17,8 @@ class FSM_API UFiniteStateMachine : public UObject//, public FTickableGameObject
 public:
 	UFiniteStateMachine();
 
-	TArray<struct FFSMState> m_State;
-	TArray<struct FFSMTransition> m_Transition;
+	TArray<struct FFSMState> State;
+	TArray<struct FFSMTransition> Transition;
 
 	FFSMState EnteryState;
 };

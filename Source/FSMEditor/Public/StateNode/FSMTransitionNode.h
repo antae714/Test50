@@ -27,6 +27,7 @@ public:
 #pragma endregion
 #pragma region UFSMStateNode_Base Interface
 	virtual UEdGraph* GetBoundGraph() const override { return BoundGraph; }
+	virtual void Compile(struct FKismetFunctionContext& Context) const override;
 #pragma endregion
 
 

@@ -72,7 +72,7 @@ void UFSMStateNode::PostPlacedNewNode()
 void UFSMStateNode::Compile(FKismetFunctionContext& Context) const
 {
 	UFiniteStateMachine* FSM_CDO = Context.NewClass->GetDefaultObject<UFiniteStateMachine>();
-	int index = FSM_CDO->m_State.Emplace();
-	FSM_CDO->m_State[index].Init({ GetNodeName() , NodeGuid });
+	int index = FSM_CDO->State.Emplace();
+	FSM_CDO->State[index].Init(GetNodeName(), NodeGuid);
 }
 

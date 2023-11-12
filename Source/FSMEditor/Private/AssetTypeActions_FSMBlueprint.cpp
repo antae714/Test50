@@ -4,6 +4,14 @@
 #include "AssetTypeActions_FSMBlueprint.h"
 #include "FSMBlueprintEditor.h"
 
+#define LOCTEXT_NAMESPACE "FAssetTypeActions_FSM"
+
+FText FAssetTypeActions_FSMBlueprint::GetName() const
+{
+	return LOCTEXT("FiniteStateMachine Name", "Finite State Machine");
+	return FText();
+}
+
 void FAssetTypeActions_FSMBlueprint::OpenAssetEditor(const TArray<UObject*>& InObjects, TSharedPtr<class IToolkitHost> EditWithinLevelEditor)
 {
 	EToolkitMode::Type Mode = EditWithinLevelEditor.IsValid() ? EToolkitMode::WorldCentric : EToolkitMode::Standalone;

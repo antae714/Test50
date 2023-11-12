@@ -19,6 +19,7 @@ void UFSMStateGraphSchema::CreateDefaultNodesForGraph(UEdGraph& Graph) const
 		NodeCreator.Finalize();
 		SetNodeMetaData(eventNode, FNodeMetadata::DefaultGraphNode);
 		eventNode->SetDelegateName(FFSMState::StateEntryName);
+
 		eventNode->NodePosY= 0;
 		eventNode->MakeAutomaticallyPlacedGhostNode();
 	}
@@ -38,8 +39,8 @@ void UFSMStateGraphSchema::CreateDefaultNodesForGraph(UEdGraph& Graph) const
 		NodeCreator.Finalize();
 		SetNodeMetaData(eventNode, FNodeMetadata::DefaultGraphNode);
 		eventNode->SetDelegateName(FFSMState::StateExitName);
-		eventNode->NodePosY = 250;
 
+		eventNode->NodePosY = 250;
 		eventNode->MakeAutomaticallyPlacedGhostNode();
 	}
 }
@@ -53,13 +54,13 @@ void UFSMStateGraphSchema::GetGraphDisplayInformation(const UEdGraph& Graph, FGr
 {
 	DisplayInfo.PlainName = FText::FromString(Graph.GetName());
 
-	const UEdGraphNode* TransNode = Cast<const UEdGraphNode>(Graph.GetOuter());
+	const UEdGraphNode* StateNode = Cast<const UEdGraphNode>(Graph.GetOuter());
 
-	if (TransNode)
+	if (StateNode)
 	{
 		FFormatNamedArguments Args;
-		Args.Add(TEXT("NodeTitle"), TransNode->GetNodeTitle(ENodeTitleType::FullTitle));
-		DisplayInfo.PlainName = FText::Format(NSLOCTEXT("UFSMTransitionGraphSchema", "TransitionGraphTitle", "[{NodeTitle}]"), Args);
+		Args.Add(TEXT("StateNodeTitle"), StateNode->GetNodeTitle(ENodeTitleType::FullTitle));
+		DisplayInfo.PlainName = FText::Format(NSLOCTEXT("UFSMStateGraphSchema", "FSMStateGraphTitle", "[{StateNodeTitle}]"), Args);
 	}
 
 	DisplayInfo.DisplayName = DisplayInfo.PlainName;

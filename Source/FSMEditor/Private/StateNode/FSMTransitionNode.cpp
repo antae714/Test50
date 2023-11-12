@@ -6,6 +6,10 @@
 #include "Graph/FSMTransitionGraph.h"
 #include "Graph/FSMTransitionGraphSchema.h"
 
+
+#include "KismetCompiledFunctionContext.h"
+#include "FiniteStateMachine.h"
+
 UFSMTransitionNode::UFSMTransitionNode(const FObjectInitializer& ObjectInitializer) : Super(ObjectInitializer)
 {
 	bCanRenameNode = false;
@@ -143,4 +147,11 @@ void UFSMTransitionNode::PostPasteNode()
 			break;
 		}
 	}
+}
+
+void UFSMTransitionNode::Compile(FKismetFunctionContext& Context) const
+{
+	UFiniteStateMachine* FSM_CDO = Context.NewClass->GetDefaultObject<UFiniteStateMachine>();
+	int index = FSM_CDO->Transition.Emplace();
+	FSM_CDO->Transition[index].Init(GetNodeName(), NodeGuid);
 }

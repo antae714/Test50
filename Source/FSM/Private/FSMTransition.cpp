@@ -3,7 +3,7 @@
 
 #include "FSMTransition.h"
 
-bool UFSMTransitionUtil::CheckTransitionCondition(bool transition)
+void FFSMTransition::SettingFunction(UFunction* func)
 {
-	return transition;
+	TransitionCondition = func;
 }
