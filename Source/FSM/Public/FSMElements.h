@@ -14,12 +14,11 @@ struct FSM_API FFSMElements
 	GENERATED_BODY()
 public:
 	void Init(FString _Name, FGuid _CompiledNodeGuid);
-
 	bool operator==(FGuid _NodeGuid);
 
 protected:
 	UPROPERTY()
-	FString m_Name;
+	FString Name;
 	UPROPERTY()
-	FGuid m_CompiledNodeGuid;
+	FGuid CompiledNodeGuid;
 };

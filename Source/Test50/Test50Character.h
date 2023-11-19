@@ -4,7 +4,11 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
+#include "FiniteStateMachine.h"
 #include "Test50Character.generated.h"
+
+
+
 
 UCLASS(config=Game)
 class ATest50Character : public ACharacter
@@ -22,7 +26,7 @@ class ATest50Character : public ACharacter
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = AAA, meta = (AllowPrivateAccess = "true", DisplayName = "FiniteStateMachine"))
 	TSubclassOf<class UFiniteStateMachine> m_FiniteStateMachine;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = AAA, meta = (AllowPrivateAccess = "true", DisplayName = "FiniteStateMachine2"))
-	TSubclassOf<class UFiniteStateMachine> m_FiniteStateMachine2;
+	FFiniteStateMachineHandler m_FiniteStateMachine2;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = AAA, meta = (AllowPrivateAccess = "true"))
 	class UAnimBlueprint * m_animBlueprint;
@@ -30,6 +34,7 @@ class ATest50Character : public ACharacter
 public:
 	ATest50Character();
 
+	virtual void Tick(float DeltaSeconds) override;
 	/** Base turn rate, in deg/sec. Other scaling may affect final turn rate. */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category=Input)
 	float TurnRateGamepad;

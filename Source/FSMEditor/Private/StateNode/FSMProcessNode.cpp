@@ -47,7 +47,7 @@ public:
 		{
 			StateNode->Compile(Context);
 		}
-		
+
 		
 		UObject* tempobj = Context.NewClass->GetDefaultObject();
 
@@ -73,9 +73,10 @@ void UFSMProcessNode::ExpandNode(FKismetCompilerContext& CompilerContext, UEdGra
 	//SourceGraph->RemoveNode(this);
 	UBlueprint* sssss = CompilerContext.Blueprint;
 	UClass* tempstatema = sssss->ParentClass.Get();
-	UFSMBlueprintGeneratedClass* asd = Cast<UFSMBlueprintGeneratedClass>(CompilerContext.Blueprint->GeneratedClass);
-	asd->TestInt += 1;
+	UFSMBlueprintGeneratedClass* BPClass = Cast<UFSMBlueprintGeneratedClass>(CompilerContext.Blueprint->GeneratedClass);
 
+	BPClass->States.Empty();
+	BPClass->Transitions.Empty();
 
 	//FSM->ssss += 1;
 
@@ -84,4 +85,9 @@ void UFSMProcessNode::ExpandNode(FKismetCompilerContext& CompilerContext, UEdGra
 FNodeHandlingFunctor* UFSMProcessNode::CreateNodeHandler(FKismetCompilerContext& CompilerContext) const
 {
 	return new FKCHandler_FSMProcess(CompilerContext);
+}
+
+bool UFSMProcessNode::CanCreateUnderSpecifiedSchema(const UEdGraphSchema* DesiredSchema) const
+{
+	return  DesiredSchema->GetClass()->IsChildOf(UFSMGraph::StaticClass());
 }

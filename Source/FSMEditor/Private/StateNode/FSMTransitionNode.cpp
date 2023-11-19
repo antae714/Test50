@@ -5,6 +5,7 @@
 #include "Kismet2/BlueprintEditorUtils.h"
 #include "Graph/FSMTransitionGraph.h"
 #include "Graph/FSMTransitionGraphSchema.h"
+#include "FSMBlueprintGeneratedClass.h"
 
 
 #include "KismetCompiledFunctionContext.h"
@@ -151,7 +152,11 @@ void UFSMTransitionNode::PostPasteNode()
 
 void UFSMTransitionNode::Compile(FKismetFunctionContext& Context) const
 {
-	UFiniteStateMachine* FSM_CDO = Context.NewClass->GetDefaultObject<UFiniteStateMachine>();
-	int index = FSM_CDO->Transition.Emplace();
-	FSM_CDO->Transition[index].Init(GetNodeName(), NodeGuid);
+	UFSMBlueprintGeneratedClass* BPClass = Cast<UFSMBlueprintGeneratedClass>(Context.NewClass);
+
+	int index = BPClass->Transitions.Emplace();
+	FFSMTransitionClass& transtion = BPClass->Transitions[index];
+
+	transtion.Init(GetNodeName(), NodeGuid);
+	transtion.NextNodeGUID = GetNextState()->NodeGuid;
 }

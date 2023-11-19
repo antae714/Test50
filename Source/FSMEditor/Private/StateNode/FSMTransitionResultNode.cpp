@@ -6,8 +6,12 @@
 #include "KismetCompiledFunctionContext.h"
 #include "EdGraphUtilities.h"
 #include "FiniteStateMachine.h"
+#include "Graph/FSMStateGraph.h"
 #include "Graph/FSMTransitionGraph.h"
 #include "StateNode/FSMTransitionNode.h"
+#include "FSMBlueprintGeneratedClass.h"
+#include "KismetCompiler.h"
+
 
 class FKCHandler_FSMTransitionResult : public FNodeHandlingFunctor
 {
@@ -16,12 +20,37 @@ public:
 		: FNodeHandlingFunctor(InCompilerContext)
 	{
 	}
+	void SettingTransition(FKismetFunctionContext& Context, UEdGraphNode* Node)
+	{
+		UFSMTransitionResultNode* FSMTransitionResult = CastChecked<UFSMTransitionResultNode>(Node);
+		UFSMBlueprintGeneratedClass* BPClass = Cast<UFSMBlueprintGeneratedClass>(Context.NewClass);
 
+		UFunction* findfuction = Context.NewClass->FindFunctionByName(FSMTransitionResult->transitionName);
+		if (findfuction)
+		{
+			FFSMTransitionClass* transtion = BPClass->Transitions.FindByKey(FSMTransitionResult->transitionGuid);
+			transtion->SettingFunction(findfuction);
+
+			Context.NewClass->RemoveFunctionFromFunctionMap(findfuction);
+		}
+	}
 	virtual FBPTerminal* RegisterLiteral(FKismetFunctionContext& Context, UEdGraphPin* Net) 
 	{
+		if (Net->LinkedTo.Num() == 0)
+		{
+			// Make sure the default value is valid
+			FString DefaultAllowedResult = CompilerContext.GetSchema()->IsCurrentPinDefaultValid(Net);
+
+			FBPTerminal* LiteralTerm = Context.RegisterLiteral(Net);
+			Context.LiteralHackMap.Add(Net, LiteralTerm);
+		}
 		RegisterNet(Context, Net);
 		return Context.NetMap[Net];
-		Context.Results.Add(FNodeHandlingFunctor::RegisterLiteral(Context, Net));
+
+		FBPTerminal* temp = FNodeHandlingFunctor::RegisterLiteral(Context, Net);
+		Context.Results.Add(temp);
+		return temp;
+
 	}
 	virtual void RegisterNet(FKismetFunctionContext& Context, UEdGraphPin* Net) override
 	{
@@ -46,21 +75,7 @@ public:
 
 	virtual void Compile(FKismetFunctionContext& Context, UEdGraphNode* Node) override
 	{
-		UFSMTransitionResultNode* FSMTransitionResult = CastChecked<UFSMTransitionResultNode>(Node);
-
-		//UFunction* findfuction = Context.NewClass->FindFunctionByName(FName(FSMTransitionResult->transitionGuid.ToString()));
-		UFunction* findfuction = Context.NewClass->FindFunctionByName(FSMTransitionResult->transitionName);
-		if (findfuction)
-		{
-			UFSMTransitionGraph* ownerdgarph = Cast<UFSMTransitionGraph>(Node->GetGraph());
-
-			UFiniteStateMachine* CDO = Context.NewClass->GetDefaultObject<UFiniteStateMachine>();
-			FFSMTransition* transtion = CDO->Transition.FindByKey(FSMTransitionResult->transitionGuid);
-			transtion->SettingFunction(findfuction);
-
-			Context.NewClass->RemoveFunctionFromFunctionMap(findfuction);
-		}
-
+		SettingTransition(Context, Node);
 
 		static const FBoolConfigValueHelper ExecutionAfterReturn(TEXT("Kismet"), TEXT("bExecutionAfterReturn"), GEngineIni);
 
@@ -76,7 +91,11 @@ public:
 			UEdGraphPin* VariablePin = Node->FindPin(TEXT("Transition Condition"), EGPD_Input);
 			FBPTerminal** VariableTerm = Context.NetMap.Find(VariablePin);
 
-			FBPTerminal** ValueTerm = Context.NetMap.Find(FEdGraphUtilities::GetNetFromPin(VariablePin));
+			FBPTerminal** ValueTerm = Context.LiteralHackMap.Find(VariablePin);
+			if (!ValueTerm) 
+			{
+				ValueTerm = Context.NetMap.Find(FEdGraphUtilities::GetNetFromPin(VariablePin));
+			}
 
 			if (VariableTerm && ValueTerm)
 			{
@@ -139,4 +158,9 @@ void UFSMTransitionResultNode::Setting()
 	transitionName = ownerdgarph->owningNode->GetFName();
 
 
+}
+
+bool UFSMTransitionResultNode::CanCreateUnderSpecifiedSchema(const UEdGraphSchema* DesiredSchema) const
+{
+	return DesiredSchema->GetClass()->IsChildOf(UFSMTransitionGraph::StaticClass());
 }

@@ -2,27 +2,53 @@
 
 
 #include "FSMState.h"
+#include "FiniteStateMachine.h"
 
-//const FName FFSMState::StateEntryName(TEXT("State Entry"));
-//const FName FFSMState::StateUpdateName(TEXT("State Update"));
-//const FName FFSMState::StateExitName(TEXT("State Exit"));
-
-void FFSMState::SettingFunction(FName FunctionName, UFunction* func)
+void FFSMState::Init(FFSMStateClass* StateClass)
 {
-	if (FunctionName == StateEntryName)
+	FFSMElements::Init(StateClass->Name, StateClass->CompiledNodeGuid);
+}
+
+void FFSMState::SettingConnection(class UFiniteStateMachine* _stateMachine, struct FFSMStateClass* StateClass)
+{
+
+	for (auto& item : StateClass->ConnectedTransitionGUID)
 	{
-		StateEntry = func;
-	}  
-	else if (FunctionName == StateUpdateName)
-	{
-		StateUpdate = func;
+		FFSMTransition* ConectedTransition = _stateMachine->Transitions.FindByKey(item);
+		if (ConectedTransition) {
+			ConnectedTransitions.Add(ConectedTransition);
+		}
 	}
-	else if (FunctionName == StateExitName)
+
+	StateEntry = StateClass->StateEntry;
+	StateUpdate = StateClass->StateUpdate;
+	StateExit = StateClass->StateExit;
+
+
+	OwningStateMachine = _stateMachine;
+}
+
+void FFSMState::ExecuteStateEntry()
+{
+	if (StateEntry)
 	{
-		StateExit = func;
-	}
-	else
-	{
-		ensure(0);
+		OwningStateMachine->ProcessEvent(StateEntry, nullptr);
 	}
 }
+
+void FFSMState::ExecuteStateUpdate()
+{
+	if (StateUpdate)
+	{
+		OwningStateMachine->ProcessEvent(StateUpdate, nullptr);
+	}
+}
+
+void FFSMState::ExecuteStateExit()
+{
+	if (StateExit)
+	{
+		OwningStateMachine->ProcessEvent(StateExit, nullptr);
+	}
+}
+

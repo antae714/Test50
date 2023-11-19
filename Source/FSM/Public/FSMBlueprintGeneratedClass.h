@@ -4,6 +4,8 @@
 
 #include "CoreMinimal.h"
 #include "Engine/BlueprintGeneratedClass.h"
+#include "FSMState.h"
+#include "FSMTransition.h"
 #include "FSMBlueprintGeneratedClass.generated.h"
 
 /**
@@ -15,6 +17,10 @@ class FSM_API UFSMBlueprintGeneratedClass : public UBlueprintGeneratedClass
 	GENERATED_BODY()
 
 public:
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	int TestInt;
+	UPROPERTY()
+	TArray<struct FFSMStateClass> States;
+	UPROPERTY()
+	TArray<struct FFSMTransitionClass> Transitions;
+	UPROPERTY()
+	FGuid EnteryStateGUID;
 };

@@ -7,10 +7,7 @@
 		{
 			"Name": "Test50",
 			"Type": "Runtime",
-			"LoadingPhase": "Default",
-			"AdditionalDependencies": [
-				"BlueprintGraph"
-			]
+			"LoadingPhase": "Default"
 		},
 		{
 			"Name": "FSM",
@@ -35,6 +32,11 @@
 			"Name": "SMSystem",
 			"Enabled": false,
 			"MarketplaceURL": "com.epicgames.launcher://ue/marketplace/content/916643d0c665469594233cb0487e6d3d"
+		},
+		{
+			"Name": "DLSS",
+			"Enabled": true,
+			"MarketplaceURL": "https://www.unrealengine.com/marketplace/en-US/product/nvidia-dlss"
 		}
 	]
 }

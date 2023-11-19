@@ -18,7 +18,7 @@ void UFSMStateGraphSchema::CreateDefaultNodesForGraph(UEdGraph& Graph) const
 		UFSM_Event* eventNode = NodeCreator.CreateNode();
 		NodeCreator.Finalize();
 		SetNodeMetaData(eventNode, FNodeMetadata::DefaultGraphNode);
-		eventNode->SetDelegateName(FFSMState::StateEntryName);
+		eventNode->SetDelegateName(StateFunction::EntryName);
 
 		eventNode->NodePosY= 0;
 		eventNode->MakeAutomaticallyPlacedGhostNode();
@@ -28,7 +28,7 @@ void UFSMStateGraphSchema::CreateDefaultNodesForGraph(UEdGraph& Graph) const
 		UFSM_Event* eventNode = NodeCreator.CreateNode();
 		NodeCreator.Finalize();
 		SetNodeMetaData(eventNode, FNodeMetadata::DefaultGraphNode);
-		eventNode->SetDelegateName(FFSMState::StateUpdateName);
+		eventNode->SetDelegateName(StateFunction::UpdateName);
 
 		eventNode->NodePosY = 125;
 		eventNode->MakeAutomaticallyPlacedGhostNode();
@@ -38,7 +38,7 @@ void UFSMStateGraphSchema::CreateDefaultNodesForGraph(UEdGraph& Graph) const
 		UFSM_Event* eventNode = NodeCreator.CreateNode();
 		NodeCreator.Finalize();
 		SetNodeMetaData(eventNode, FNodeMetadata::DefaultGraphNode);
-		eventNode->SetDelegateName(FFSMState::StateExitName);
+		eventNode->SetDelegateName(StateFunction::ExitName);
 
 		eventNode->NodePosY = 250;
 		eventNode->MakeAutomaticallyPlacedGhostNode();

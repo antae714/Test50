@@ -24,7 +24,8 @@ public class FSMEditor : ModuleRules
 			"UnrealEd",
 			"BlueprintGraph",
 			"GraphEditor",
-			"EditorStyle"
+			"EditorStyle",
+			"Projects"
 		});
 	}
 }

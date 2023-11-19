@@ -53,6 +53,12 @@ ATest50Character::ATest50Character()
 	// are set in the derived blueprint asset named ThirdPersonCharacter (to avoid direct content references in C++)
 }
 
+void ATest50Character::Tick(float DeltaSeconds)
+{
+	Super::Tick(DeltaSeconds);
+	auto getworld = GetWorld();
+}
+
 //////////////////////////////////////////////////////////////////////////
 // Input
 
@@ -77,6 +83,8 @@ void ATest50Character::SetupPlayerInputComponent(class UInputComponent* PlayerIn
 	// handle touch devices
 	PlayerInputComponent->BindTouch(IE_Pressed, this, &ATest50Character::TouchStarted);
 	PlayerInputComponent->BindTouch(IE_Released, this, &ATest50Character::TouchStopped);
+
+	m_FiniteStateMachine2.Init(this);
 }
 
 void ATest50Character::TouchStarted(ETouchIndex::Type FingerIndex, FVector Location)
@@ -117,24 +125,24 @@ void ATest50Character::MoveForward(float Value)
 
 		TFieldIterator<FProperty> It(animgraphFunc);
 		
-		UObject* temp = m_FiniteStateMachine.GetDefaultObject();
-		UObject* temp2 = m_FiniteStateMachine2.GetDefaultObject();
-		UObject* temp_ = m_FiniteStateMachine.Get();
-		UObject* temp2_ = m_FiniteStateMachine2.Get();
-		
+		//UObject* temp = m_FiniteStateMachine.GetDefaultObject();
+		//UObject* temp2 = m_FiniteStateMachine2.GetDefaultObject();
+		//UObject* temp_ = m_FiniteStateMachine.Get();
+		//UObject* temp2_ = m_FiniteStateMachine2.Get();
+		//
 
-		UClass* temp_Owner = Cast<UBlueprintGeneratedClass>(temp_)->GetOwnerClass();
-		UStruct* temp_Owner2 = Cast<UBlueprintGeneratedClass>(temp_)->GetOwnerStruct();
-		
-		UClass* tempclass = temp->GetClass();
+		//UClass* temp_Owner = Cast<UBlueprintGeneratedClass>(temp_)->GetOwnerClass();
+		//UStruct* temp_Owner2 = Cast<UBlueprintGeneratedClass>(temp_)->GetOwnerStruct();
+		//
+		//UClass* tempclass = temp->GetClass();
 		UClass* thisclass = this->GetClass();
 		
 		FProperty* NewVar_0prop = thisclass->FindPropertyByName(TEXT("NewVar_0"));
 		UFunction* TESTFunction = thisclass->FindFunctionByName(TEXT("TESTFunction"));
 		UFunction* EMptyFunction = thisclass->FindFunctionByName(TEXT("EMptyFunction"));
-		UFunction* testbegin = tempclass->FindFunctionByName(TEXT("OnBegin"));
+		//UFunction* testbegin = tempclass->FindFunctionByName(TEXT("OnBegin"));
 
-		if(testbegin) temp->ProcessEvent(testbegin, nullptr);
+		//if(testbegin) temp->ProcessEvent(testbegin, nullptr);
 		
 		int a = 5;
 
@@ -153,8 +161,14 @@ void ATest50Character::MoveForward(float Value)
 		// get forward vector
 		const FVector Direction = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X);
 		AddMovementInput(Direction, Value);
-
-
+		TArray<FString> names;
+		TArray<FString> Result;
+		GConfig->GetSectionNames(GEngineIni, names);
+		//GConfig->GetSection(TEXT("/Script/NavigationSystem.RecastNavMesh"), Result, GEngineIni);
+		float radius = 0.0f;
+		GConfig->GetFloat(TEXT("/Script/NavigationSystem.RecastNavMesh"), TEXT("Agent Radius"), radius, GEngineIni);
+		GConfig->SetFloat(TEXT("/Script/NavigationSystem.RecastNavMesh"), TEXT("Agent Radius"), 44.0f, GEngineIni);
+		GConfig->GetFloat(TEXT("/Script/NavigationSystem.RecastNavMesh"), TEXT("Agent Radius"), radius, GEngineIni);
 	}
 }
 

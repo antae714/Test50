@@ -23,4 +23,7 @@ public:
 	virtual UEdGraphPin* GetOutputPin() const { return Pins[0]; }
 	virtual bool CanUserDeleteNode() const { return false; }
 #pragma endregion
+#pragma region UFSMStateNode_Base Interface
+	virtual void Compile(struct FKismetFunctionContext& Context) const override;
+#pragma endregion
 };

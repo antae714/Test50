@@ -9,6 +9,7 @@
 #include "Kismet2/BlueprintEditorUtils.h"
 #include "KismetCompiledFunctionContext.h"
 #include "FiniteStateMachine.h"
+#include "FSMBlueprintGeneratedClass.h"
 
 class FKCHandler_FSMEventEntry : public FNodeHandlingFunctor
 {
@@ -17,22 +18,24 @@ public:
 		: FNodeHandlingFunctor(InCompilerContext)
 	{
 	}
-
-	virtual void Compile(FKismetFunctionContext& Context, UEdGraphNode* Node) override 
+	void SettingState(FKismetFunctionContext& Context, UEdGraphNode* Node)
 	{
+		UFSMBlueprintGeneratedClass* BPClass = Cast<UFSMBlueprintGeneratedClass>(Context.NewClass);
 		UFSM_Event* EventNode = CastChecked<UFSM_Event>(Node);
-		
+
 		UFunction* findfuction = Context.NewClass->FindFunctionByName(EventNode->CustomFunctionName);
-		if (findfuction) 
+		if (findfuction)
 		{
 			UFiniteStateMachine* CDO = Context.NewClass->GetDefaultObject<UFiniteStateMachine>();
-			FFSMState* state = CDO->State.FindByKey(EventNode->StateGuid);
+			FFSMStateClass* state = BPClass->States.FindByKey(EventNode->StateGuid);
 			state->SettingFunction(EventNode->DelegateName, findfuction);
 
 			Context.NewClass->RemoveFunctionFromFunctionMap(findfuction);
 		}
-
-		//FKCHandler_EventEntry::Compile(Context, Node);
+	}
+	virtual void Compile(FKismetFunctionContext& Context, UEdGraphNode* Node) override 
+	{
+		SettingState(Context, Node);
 		FBlueprintCompiledStatement& Statement = GenerateSimpleThenGoto(Context, *Node);
 	}
 };
@@ -52,8 +55,7 @@ FText UFSM_Event::GetNodeTitle(ENodeTitleType::Type TitleType) const
 bool UFSM_Event::CanCreateUnderSpecifiedSchema(const UEdGraphSchema* DesiredSchema) const
 {
 	bool bIsInStateGraph = DesiredSchema->GetClass()->IsChildOf(UFSMStateGraph::StaticClass());
-	bool bIsInTransitionGraph = DesiredSchema->GetClass()->IsChildOf(UFSMTransitionGraph::StaticClass());
-	return bIsInStateGraph || bIsInTransitionGraph;
+	return bIsInStateGraph;
 }
 
 FNodeHandlingFunctor* UFSM_Event::CreateNodeHandler(FKismetCompilerContext& CompilerContext) const

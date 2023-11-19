@@ -6,6 +6,31 @@
 #include "FSMElements.h"
 #include "FSMTransition.generated.h"
 
+
+USTRUCT()
+struct FSM_API FFSMTransitionClass : public FFSMElements
+{
+	GENERATED_BODY()
+public:
+	friend struct FFSMTransition;
+
+public:
+	void SettingFunction(UFunction* func)
+	{
+		TransitionCondition = func;
+	}
+
+
+public:
+	UPROPERTY()
+	TObjectPtr<UFunction> TransitionCondition;
+
+public:
+	UPROPERTY()
+	FGuid NextNodeGUID;
+};
+
+
 /**
  * 
  */
@@ -13,17 +38,22 @@ USTRUCT()
 struct FSM_API FFSMTransition : public FFSMElements
 {
 	GENERATED_BODY()
+public:
+	friend struct FFSMTransitionClass;
 
 public:
-	void SettingFunction(UFunction* func);
+	void Init(struct FFSMTransitionClass* StateClass);
+	void SettingConnection(class UFiniteStateMachine* _stateMachine, struct FFSMTransitionClass* _TransitionClass);
 
-	bool operator==(FGuid _NodeGuid) { return m_CompiledNodeGuid == _NodeGuid; }
+	bool ExecuteTransitionCondition();
+
 public:
-	UPROPERTY()
+	TObjectPtr<struct FFSMState> NextNode;
+
+protected:
 	TObjectPtr<UFunction> TransitionCondition;
 
-public:
-	TObjectPtr<struct FFSMState> m_OwnedNode;
-	TObjectPtr<struct FFSMState> m_NextNode;
+protected:
+	UFiniteStateMachine* OwningStateMachine;
 };
 
