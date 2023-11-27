@@ -14,7 +14,7 @@ public class Test50 : ModuleRules
 			"Engine", 
 			"InputCore", 
 			"HeadMountedDisplay",
-			"FSM"
+			"FiniteStateMachine"
 		});
 	}
 }

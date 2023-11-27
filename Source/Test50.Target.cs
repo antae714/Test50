@@ -9,6 +9,6 @@ public class Test50Target : TargetRules
 	{
 		Type = TargetType.Game;
 		DefaultBuildSettings = BuildSettingsVersion.V2;
-		ExtraModuleNames.AddRange(new string[] { "Test50", "FSM" });
+		ExtraModuleNames.AddRange(new string[] { "Test50" });
 	}
 }

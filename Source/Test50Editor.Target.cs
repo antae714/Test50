@@ -9,6 +9,6 @@ public class Test50EditorTarget : TargetRules
 	{
 		Type = TargetType.Editor;
 		DefaultBuildSettings = BuildSettingsVersion.V2;
-		ExtraModuleNames.AddRange(new string[] { "Test50", "FSM", "FSMEditor" });
+		ExtraModuleNames.AddRange(new string[] { "Test50" });
 	}
 }

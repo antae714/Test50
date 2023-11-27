@@ -23,8 +23,6 @@ class ATest50Character : public ACharacter
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
 	class UCameraComponent* FollowCamera;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = AAA, meta = (AllowPrivateAccess = "true", DisplayName = "FiniteStateMachine"))
-	TSubclassOf<class UFiniteStateMachine> m_FiniteStateMachine;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = AAA, meta = (AllowPrivateAccess = "true", DisplayName = "FiniteStateMachine2"))
 	FFiniteStateMachineHandler m_FiniteStateMachine2;
 

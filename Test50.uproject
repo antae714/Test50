@@ -8,16 +8,6 @@
 			"Name": "Test50",
 			"Type": "Runtime",
 			"LoadingPhase": "Default"
-		},
-		{
-			"Name": "FSM",
-			"Type": "Runtime",
-			"LoadingPhase": "Default"
-		},
-		{
-			"Name": "FSMEditor",
-			"Type": "Editor",
-			"LoadingPhase": "PreDefault"
 		}
 	],
 	"Plugins": [
